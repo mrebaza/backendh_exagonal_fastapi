@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 import uuid
 from sqlalchemy.orm import Session
 from ..persistence.user_model import UserModel
@@ -44,3 +44,17 @@ class DBUserRepository(UserRepository):
                     hashed_password=user_model.hashed_password
                 )
         return None
+    
+    def find_all(self) -> List[User]:
+        with self._session_factory() as session:
+            user_models = session.query(UserModel).all()
+            return [
+                User(
+                    id=user_model.id,
+                    name=user_model.name,
+                    email=user_model.email,
+                    hashed_password=user_model.hashed_password
+                )
+                for user_model in user_models
+            ]
+        return None    

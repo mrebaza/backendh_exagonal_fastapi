@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException
 import uuid
 from dependency_injector.wiring import inject, Provide
@@ -57,3 +58,39 @@ def get_user_by_id(
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return user
+
+@router.get(
+    "/users/by_email/{user_email}",
+    response_model=UserDTO,
+    summary="Obtiene un usuario por email"
+)
+
+@inject
+def get_user_by_email(
+    user_email: str,
+    user_repository: UserRepository = Depends(Provide[AppContainer.user_repository]),
+):
+    """
+    Endpoint para la CONSULTA. Lee directamente de la base de datos
+    a través del repositorio.
+    """
+    user = user_repository.find_by_email(user_email)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return user
+
+@router.get(
+    "/users/all/",
+    response_model=List[UserDTO],
+    summary="Obtiene todos los usuarios"
+)
+@inject
+def get_all_users(
+    user_repository: UserRepository = Depends(Provide[AppContainer.user_repository]),
+):
+    """
+    Endpoint para la CONSULTA. Lee directamente de la base de datos
+    a través del repositorio.
+    """
+    users = user_repository.find_all()
+    return users

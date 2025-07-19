@@ -1,59 +1,74 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
     container_name: my-postgres-db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hexagonal_db
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   rabbitmq:
-    image: rabbitmq:3.11-management
+    image: rabbitmq:3-management
     container_name: my-rabbitmq
-    ports:
-      - "5672:5672"   # para la aplicación
-      - "15672:15672" # para la UI de management
     environment:
+      RABBITMQ_DEFAULT_HOST: rabbitmq
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
 
-  api:
+  app:
     build: .
     container_name: my-fastapi-app
-    command: uvicorn src.app.main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - ./src:/app/src
     ports:
       - "8000:8000"
-    depends_on:
-      - db
-      - rabbitmq
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      - RABBITM_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_PASS=${RABBITMQ_DEFAULT_PASS}
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/hexagonal_db
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASS=admin
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
 
   worker:
     build: .
     container_name: my-command-worker
     command: python -m src.worker.main
-    volumes:
-      - ./src:/app/src
-    depends_on:
-      - db
-      - rabbitmq
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      - RABBITM_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_PASS=${RABBITMQ_DEFAULT_PASS}
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/hexagonal_db
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASS=admin
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
 
 volumes:
   postgres_data:
