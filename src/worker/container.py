@@ -7,9 +7,12 @@ from sqlalchemy.orm import sessionmaker
 # from ..contexts.users.infrastructure.adapters.db_repository import DBUserRepository
 # from ..contexts.users.application.use_cases import UserCreator
 
+from src.contexts.users.infrastructure.adapters.mq_command_bus import RabbitMQCommandBus
 from src.config import settings
 from src.contexts.users.infrastructure.adapters.db_repository import DBUserRepository
-from contexts.users.application.use_cases_command import UserCreator
+# from contexts.users.application.use_cases_command import UserCreator
+from src.contexts.users.application.use_cases_command import UserCreator
+
 
 
 class WorkerContainer(containers.DeclarativeContainer):
@@ -25,6 +28,7 @@ class WorkerContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
     config.from_dict(settings.model_dump())
 
+
     # Base de Datos
     db_engine = providers.Singleton(create_engine, url=config.DATABASE_URL)
     db_session_factory = providers.Factory(
@@ -37,11 +41,22 @@ class WorkerContainer(containers.DeclarativeContainer):
     # Repositorios (Adaptadores de persistencia)
     user_repository = providers.Factory(
         DBUserRepository, 
-        db_session=db_session_factory
+        db_session_factory=db_session_factory
     )
+        
+    # Bus de Comandos (RabbitMQ)
+    # command_bus = providers.Singleton(RabbitMQCommandBus, host=settings.RABBITMQ
+    command_bus = providers.Singleton(RabbitMQCommandBus, 
+                                      host=config.RABBITMQ_HOST(), 
+                                      user=config.RABBITMQ_USER(), 
+                                      password=config.RABBITMQ_PASS())
+
 
     # Casos de Uso (Lógica de aplicación)
     user_creator = providers.Factory(
         UserCreator, 
-        user_repository=user_repository
+        user_repository=user_repository,
+        command_bus=command_bus
     )
+
+    

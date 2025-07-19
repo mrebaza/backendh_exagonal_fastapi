@@ -17,23 +17,29 @@ def main():
         password=container.config.RABBITMQ_PASS()
     )
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=container.config.RABBITMQ_HOST(), credentials=credentials)
+        pika.ConnectionParameters(
+            host=container.config.RABBITMQ_HOST(), 
+            credentials=credentials,
+            heartbeat=600,  # Mantiene la conexión viva
+            blocked_connection_timeout=300)  # Tiempo máximo de espera para la conexión
     )
     
     channel = connection.channel()
 
-    # queue_name = "user_creation_queue"
+    # queue_name = "user_events"
     # 2. El nombre de la cola debe coincidir con el routing_key que usa el publicador
-    #    con el exchange por defecto. En este caso es "user.create".
-    queue_name = "user.create"
+    #    con el exchange por defecto. En este caso es "user_events".
+    queue_name = "user_events"
     
     channel.queue_declare(queue=queue_name, durable=True)
 
     def callback(ch, method, properties, body):
         print(f" [x] Received command routing key: {method.routing_key}")
-        data = json.loads(body)
+        # data = json.loads(body)
+        data = json.loads(body.decode("utf-8"))
+
         
-        if method.routing_key == "user.create":
+        if method.routing_key == "user_events":
             command = CreateUserCommand(**data)
             user_creator = container.user_creator()
             try:

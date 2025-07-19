@@ -1,11 +1,17 @@
+import json
+from ..infrastructure.adapters.mq_command_bus import RabbitMQCommandBus
 from ..domain.entities import User
 from ..domain.repository import UserRepository
 from .commands import CreateUserCommand
 
 class UserCreator:
     """Caso de uso para crear un usuario."""
-    def __init__(self, user_repository: UserRepository):
+    # def __init__(self, user_repository: UserRepository):
+    #     self._repository = user_repository
+    
+    def __init__(self, user_repository: UserRepository, command_bus: RabbitMQCommandBus):
         self._repository = user_repository
+        self._command_bus = command_bus    
 
     def handle(self, command: CreateUserCommand) -> None:
         # Validar que el usuario no exista
@@ -20,3 +26,4 @@ class UserCreator:
             hashed_password=hashed_password
         )
         self._repository.save(user)
+        

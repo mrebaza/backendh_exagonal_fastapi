@@ -6,6 +6,7 @@ class UserDTO(BaseModel):
     id: uuid.UUID
     name: str
     email: str
+    # password: str
 
     class Config:
         from_attributes = True # Anteriormente orm_mode

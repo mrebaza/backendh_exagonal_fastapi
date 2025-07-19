@@ -26,7 +26,7 @@ class AppContainer(containers.DeclarativeContainer):
     db_engine = providers.Singleton(create_engine, url=config.DATABASE_URL)
     db_session_factory = providers.Factory(sessionmaker, bind=db_engine, autocommit=False, autoflush=False)
 
-    user_repository = providers.Factory(DBUserRepository, db_session=db_session_factory)
+    user_repository = providers.Factory(DBUserRepository, db_session_factory=db_session_factory)
 
     # RabbitMQ (Adaptador de mensajería)
     rabbitmq_connection_params = providers.Singleton(

@@ -24,7 +24,9 @@ def create_user(
     Endpoint para el COMANDO. No crea el usuario directamente,
     sino que envía el comando a RabbitMQ.
     """
-    command_bus.publish("user.create", command.model_dump_json())
+    
+    print("Mensaje publicado...  router.py")
+    command_bus.publish("user_events", command.model_dump_json())
     
     # repository = SQLAlchemyUserRepository(db)
     # use_case = CreateUserUseCase(repository)

@@ -1,3 +1,4 @@
+import json
 import pika
 from pika.exceptions import AMQPConnectionError
 
@@ -36,11 +37,21 @@ class RabbitMQCommandBus:
             channel = self.connection.channel()
             # Declaramos la cola para asegurarnos que exista.
             channel.queue_declare(queue='user_events', durable=True)
+            
+            body = json.dumps(message)
+            body = message.encode('utf-8')  # Aseguramos que el mensaje sea bytes
+            
+            print("Mensaje publicado...     mq_command_bus.py")
             channel.basic_publish(
                 exchange='',  # Usamos el exchange por defecto
                 routing_key=routing_key,
-                body=message
+                body=message,
+                properties=pika.BasicProperties(
+                    delivery_mode=2,  # Hace que el mensaje sea persistente
+                    content_type='application/json'
+                )
             )
+            print(f"Mensaje publicado correctamente en la cola '{routing_key}': {body}")
             channel.close()
         except Exception as e:
             print(f"Error al publicar mensaje en RabbitMQ: {e}")
