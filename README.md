@@ -34,14 +34,14 @@ La aplicación utiliza **FastAPI** para la capa de API, **SQLAlchemy** para inte
 
 ## Decisiones Arquitectónicas
 
-- **Arquitectura Hexagonal**: Garantiza que la lógica de negocio sea independiente de frameworks y bases de datos, permitiendo cambios de tecnología sin problemas. [cite: 6]
-- **CQRS**: Separa los comandos (operaciones de escritura) de las consultas (operaciones de lectura) para optimizar el rendimiento y la escalabilidad. Los comandos se procesan de forma asíncrona mediante **RabbitMQ** para mayor resiliencia. [cite: 7, 59]
-- **Contextos Delimitados**: Organiza el código por dominios de negocio (`users`, `auth`) en lugar de capas técnicas, promoviendo modularidad y desarrollo paralelo. [cite: 9, 54]
+- **Arquitectura Hexagonal**: Garantiza que la lógica de negocio sea independiente de frameworks y bases de datos, permitiendo cambios de tecnología sin problemas.
+- **CQRS**: Separa los comandos (operaciones de escritura) de las consultas (operaciones de lectura) para optimizar el rendimiento y la escalabilidad. Los comandos se procesan de forma asíncrona mediante **RabbitMQ** para mayor resiliencia.
+- **Contextos Delimitados**: Organiza el código por dominios de negocio (`users`, `auth`) en lugar de capas técnicas, promoviendo modularidad y desarrollo paralelo.
 - **Inyección de Dependencias**: Utiliza `dependency-injector` para desacoplar componentes, facilitar pruebas y simplificar la configuración.
 
 ## Estructura del Proyecto
 
-El código está organizado en **Contextos Delimitados** para garantizar alta cohesión y bajo acoplamiento. [cite: 9]
+El código está organizado en **Contextos Delimitados** para garantizar alta cohesión y bajo acoplamiento.
 
 ### Estructura de Directorios Propuesta
 
@@ -182,7 +182,7 @@ Asegúrate de que los servicios de base de datos y RabbitMQ estén activos antes
 
 #### `GET /users/{user_id}`
 
-- **Descripción**: Obtiene los detalles de un usuario por su ID, consultando directamente la base de datos (Consulta CQRS). [cite: 25, 37]
+- **Descripción**: Obtiene los detalles de un usuario por su ID, consultando directamente la base de datos (Consulta CQRS).
 - **Parámetro de Ruta**:
   - `user_id` (UUID): Identificador único del usuario.
 - **Respuestas**:
