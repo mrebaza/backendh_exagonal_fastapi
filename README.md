@@ -108,8 +108,8 @@ Esta es la estructura que construiremos. Refleja todos los principios anteriores
 
 1. **Clonar el Repositorio**:
    ```bash
-   git clone <url-del-repositorio>
-   cd <directorio-del-repositorio>
+   git clone https://github.com/mrebaza/backendh_exagonal_fastapi
+   cd backendh_exagonal_fastapi
    ```
 
 2. **Configurar Variables de Entorno**:
@@ -202,16 +202,16 @@ Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 
 ```ini
 # Base de Datos PostgreSQL
-POSTGRES_USER=miusuario
-POSTGRES_PASSWORD=micontraseña
-POSTGRES_DB=mibasededatos
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=hexagonal_db
 
 # RabbitMQ
-RABBITMQ_USER=guest
-RABBITMQ_PASS=guest
+RABBITMQ_USER=admin
+RABBITMQ_PASS=admin
 
 # URLs de conexión (usadas por la aplicación y el worker en Docker)
-DATABASE_URL=postgresql://miusuario:micontraseña@db:5432/mibasededatos
+DATABASE_URL=postgresql://postgres:postgres@db:5432/hexagonal_db
 RABBITMQ_HOST=rabbitmq
 ```
 
@@ -225,7 +225,6 @@ RABBITMQ_HOST=rabbitmq
 4. Sube la rama (`git push origin feature/tu-funcionalidad`).
 5. Abre un Pull Request.
 
-Asegúrate de que tu código siga los estándares del proyecto e incluya pruebas.
 
 ## Licencia
 
